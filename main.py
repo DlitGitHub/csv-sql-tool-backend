@@ -15,7 +15,7 @@ DB_PATH = os.path.join(DB_DIR, "db.duckdb")
 os.makedirs(DB_DIR, exist_ok=True)
 
 app = FastAPI(
-    title="Artemis Assignment – CSV SQL Explorer",
+    title="Artemis Assignment – CSV SQL tool",
     description="Upload a CSV and query it as a table named 'tablename'.",
     version="1.0.0",
 )
