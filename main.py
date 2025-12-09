@@ -25,7 +25,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
-        "https://csv-sql-tool-frontend.vercel.app",
+        "https://csv-sql-tool.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
