@@ -15,12 +15,12 @@ DB_PATH = os.path.join(DB_DIR, "db.duckdb")
 os.makedirs(DB_DIR, exist_ok=True)
 
 app = FastAPI(
-    title="Artemis Assignment – CSV SQL tool",
+    title="Artemis Assignment – CSV SQL Explorer",
     description="Upload a CSV and query it as a table named 'tablename'.",
     version="1.0.0",
 )
 
-# Allow React dev server to talk to this backend.
+# Allow React dev server to talk to this backend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -31,7 +31,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 
 def get_connection() -> duckdb.DuckDBPyConnection:
@@ -72,7 +71,8 @@ async def upload_csv(file: UploadFile = File(...)):
         with tempfile.NamedTemporaryFile(delete=False, suffix=".csv") as tmp:
             temp_path = tmp.name
             while True:
-                chunk = await file.read(1024 * 1024)  # 1MB at a time
+                # 8MB at a time instead of 1MB
+                chunk = await file.read(8 * 1024 * 1024)
                 if not chunk:
                     break
                 tmp.write(chunk)
@@ -92,7 +92,15 @@ async def upload_csv(file: UploadFile = File(...)):
             [temp_path],
         )
 
-        rows_loaded = conn.execute("SELECT COUNT(*) FROM tablename").fetchone()[0]
+        # Count rows only for smaller files
+        MAX_COUNT_MB = 100  # Above this size we skip COUNT(*)
+        file_size_mb = os.path.getsize(temp_path) / (1024 * 1024)
+
+        if file_size_mb <= MAX_COUNT_MB:
+            rows_loaded = conn.execute("SELECT COUNT(*) FROM tablename").fetchone()[0]
+        else:
+            # Use -1 as a sentinel for "not counted"
+            rows_loaded = -1
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to load CSV: {e}")
