@@ -20,7 +20,7 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# Allow React dev server to talk to this backend
+# Allow React dev server to talk to this backend.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
